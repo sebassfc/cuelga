@@ -1,0 +1,12 @@
+{
+  "id": "sv-02", "tipo": "secuestro_virtual", "sintetico": true,
+  "descripcion": "«¿No me reconoces?»: la víctima suelta el nombre y el llamante lo usa.",
+  "turnos": [
+    { "hablante": "llamante", "texto": "Tía, ¿no me reconoces? Soy yo.", "etapa": "gancho" },
+    { "hablante": "victima", "texto": "¿Eres tú, Luis?", "etapa": "ninguna" },
+    { "hablante": "llamante", "texto": "Sí, tía, soy Luis. Tuve un problema y me detuvieron unos señores.", "etapa": "gancho" },
+    { "hablante": "llamante", "texto": "No llames a mi mamá, se va a preocupar. Mantente en la línea, ¿sí?", "etapa": "aislamiento" },
+    { "hablante": "llamante", "texto": "Necesito que me ayudes con quince mil para que me suelten.", "etapa": "exigencia" },
+    { "hablante": "llamante", "texto": "Te paso una CLABE para la transferencia.", "etapa": "pago" }
+  ]
+}

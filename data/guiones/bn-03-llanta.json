@@ -1,0 +1,9 @@
+{
+  "id": "bn-03", "tipo": "benigna", "sintetico": true,
+  "descripcion": "Emergencia real y menor: se ponchó una llanta.",
+  "turnos": [
+    { "hablante": "llamante", "texto": "Pa, ayúdame, se me ponchó la llanta en la carretera.", "etapa": "gancho" },
+    { "hablante": "victima", "texto": "¿Dónde estás? Voy para allá.", "etapa": "ninguna" },
+    { "hablante": "llamante", "texto": "Por la salida a Saltillo, te mando la ubicación.", "etapa": "ninguna" }
+  ]
+}

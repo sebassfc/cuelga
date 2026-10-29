@@ -1,0 +1,16 @@
+/node_modules
+/.next/
+/out/
+/build
+/coverage
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+# secretos: solo .env.example entra al repo
+.env*
+!.env.example
+# audio crudo de pruebas (puede tener voces de personas)
+/audio/

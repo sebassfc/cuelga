@@ -1,0 +1,9 @@
+{
+  "id": "bn-01", "tipo": "benigna", "sintetico": true,
+  "descripcion": "Hija avisa que llega tarde.",
+  "turnos": [
+    { "hablante": "llamante", "texto": "Ma, voy a llegar tarde, se me hizo larga la clase.", "etapa": "ninguna" },
+    { "hablante": "victima", "texto": "Está bien, mija. ¿Te guardo de cenar?", "etapa": "ninguna" },
+    { "hablante": "llamante", "texto": "Sí porfa, y ya te deposité lo de la luz.", "etapa": "ninguna" }
+  ]
+}

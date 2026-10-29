@@ -1,0 +1,10 @@
+{
+  "id": "sv-04", "tipo": "secuestro_virtual", "sintetico": true,
+  "descripcion": "Pago en tarjetas de saldo y amenaza de vigilancia.",
+  "turnos": [
+    { "hablante": "llamante", "texto": "Mamá, auxilio, me agarraron saliendo de la escuela.", "etapa": "gancho" },
+    { "hablante": "llamante", "texto": "Señora, la estamos vigilando. Apague la tele y no hable con nadie.", "etapa": "autoridad" },
+    { "hablante": "llamante", "texto": "¿Cuánto tiene en la casa? Junte todo.", "etapa": "exigencia" },
+    { "hablante": "llamante", "texto": "Compre tarjetas de regalo y me dicta los números.", "etapa": "pago" }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "resumen": {
+    "modo": "solo léxico",
+    "guiones": 8,
+    "exactitudEtapaPorTurno": 0.9090909090909091,
+    "secuestrosDetectados": "4/4",
+    "turnoPromedioDeAlerta": 2.5,
+    "falsasAlarmas": "0/4",
+    "usd": 0,
+    "erroresDelModelo": 0
+  },
+  "filas": [
+    {
+      "id": "bn-01",
+      "tipo": "benigna",
+      "turnos": 3,
+      "aciertosEtapa": 2,
+      "turnoAlerta": null,
+      "usd": 0,
+      "errores": 0
+    },
+    {
+      "id": "bn-02",
+      "tipo": "benigna",
+      "turnos": 3,
+      "aciertosEtapa": 3,
+      "turnoAlerta": null,
+      "usd": 0,
+      "errores": 0
+    },
+    {
+      "id": "bn-03",
+      "tipo": "benigna",
+      "turnos": 3,
+      "aciertosEtapa": 3,
+      "turnoAlerta": null,
+      "usd": 0,
+      "errores": 0
+    },
+    {
+      "id": "bn-04",
+      "tipo": "benigna",
+      "turnos": 3,
+      "aciertosEtapa": 2,
+      "turnoAlerta": null,
+      "usd": 0,
+      "errores": 0
+    },
+    {
+      "id": "sv-01",
+      "tipo": "secuestro_virtual",
+      "turnos": 6,
+      "aciertosEtapa": 6,
+      "turnoAlerta": 3,
+      "usd": 0,
+      "errores": 0
+    },
+    {
+      "id": "sv-02",
+      "tipo": "secuestro_virtual",
+      "turnos": 6,
+      "aciertosEtapa": 5,
+      "turnoAlerta": 4,
+      "usd": 0,
+      "errores": 0
+    },
+    {
+      "id": "sv-03",
+      "tipo": "secuestro_virtual",
+      "turnos": 5,
+      "aciertosEtapa": 5,
+      "turnoAlerta": 1,
+      "usd": 0,
+      "errores": 0
+    },
+    {
+      "id": "sv-04",
+      "tipo": "secuestro_virtual",
+      "turnos": 4,
+      "aciertosEtapa": 4,
+      "turnoAlerta": 2,
+      "usd": 0,
+      "errores": 0
+    }
+  ]
+}

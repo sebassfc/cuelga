@@ -1,0 +1,9 @@
+{
+  "id": "bn-04", "tipo": "benigna", "sintetico": true,
+  "descripcion": "Llamada de trabajo con montos y transferencias normales.",
+  "turnos": [
+    { "hablante": "llamante", "texto": "Oye, ¿ya quedó la transferencia del proveedor?", "etapa": "ninguna" },
+    { "hablante": "victima", "texto": "Sí, salió en la mañana, eran doce mil.", "etapa": "ninguna" },
+    { "hablante": "llamante", "texto": "Va, gracias. Nos vemos en la junta.", "etapa": "ninguna" }
+  ]
+}

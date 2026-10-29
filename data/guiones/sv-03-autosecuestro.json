@@ -1,0 +1,11 @@
+{
+  "id": "sv-03", "tipo": "secuestro_virtual", "sintetico": true,
+  "descripcion": "Variante sin llanto: falsa autoridad primero y presión para no colgar.",
+  "turnos": [
+    { "hablante": "llamante", "texto": "Buenas tardes, le llamo de la fiscalía por un asunto de su hijo.", "etapa": "autoridad" },
+    { "hablante": "victima", "texto": "¿De mi hijo? ¿Qué le pasó?", "etapa": "ninguna" },
+    { "hablante": "llamante", "texto": "Lo tenemos aquí detenido. Si cuelga, ya no le podemos ayudar.", "etapa": "aislamiento" },
+    { "hablante": "llamante", "texto": "Para que no lo pasen al reclusorio necesitamos veinte mil de fianza.", "etapa": "exigencia" },
+    { "hablante": "llamante", "texto": "Haga un depósito por SPEI a esta cuenta, ahorita mismo.", "etapa": "pago" }
+  ]
+}

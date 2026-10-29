@@ -1,0 +1,9 @@
+{
+  "id": "bn-02", "tipo": "benigna", "sintetico": true,
+  "descripcion": "Banco confirma una compra (sin pedir datos).",
+  "turnos": [
+    { "hablante": "llamante", "texto": "Buenas tardes, le llamamos para confirmar una compra en su tarjeta terminación 4521.", "etapa": "ninguna" },
+    { "hablante": "victima", "texto": "Sí, esa compra la hice yo.", "etapa": "ninguna" },
+    { "hablante": "llamante", "texto": "Perfecto, gracias. Que tenga buen día.", "etapa": "ninguna" }
+  ]
+}

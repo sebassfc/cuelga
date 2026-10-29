@@ -1,0 +1,12 @@
+{
+  "id": "sv-01", "tipo": "secuestro_virtual", "sintetico": true,
+  "descripcion": "Clásico: voz llorando, aislamiento, comandante, exigencia y OXXO.",
+  "turnos": [
+    { "hablante": "llamante", "texto": "¡Abuelita, ayúdame, por favor! ¡Me tienen!", "etapa": "gancho" },
+    { "hablante": "victima", "texto": "¿Ana? ¿Qué pasa, mija? ¿Dónde estás?", "etapa": "ninguna" },
+    { "hablante": "llamante", "texto": "Señora, cállese y escuche. No cuelgue y no le diga a nadie.", "etapa": "aislamiento" },
+    { "hablante": "llamante", "texto": "Habla el comandante. Sabemos dónde vive usted.", "etapa": "autoridad" },
+    { "hablante": "llamante", "texto": "Queremos cincuenta mil pesos hoy o a la muchacha le va a pasar algo.", "etapa": "exigencia" },
+    { "hablante": "llamante", "texto": "Vaya al OXXO más cercano y deposite a la tarjeta que le voy a dictar.", "etapa": "pago" }
+  ]
+}
