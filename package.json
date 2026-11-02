@@ -12,7 +12,8 @@
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",
     "humo": "tsx --env-file-if-exists=.env.local scripts/humo.ts",
-    "eval": "tsx --env-file-if-exists=.env.local scripts/eval.ts"
+    "eval": "tsx --env-file-if-exists=.env.local scripts/eval.ts",
+    "voces": "tsx --env-file-if-exists=.env.local scripts/voces.ts"
   },
   "dependencies": {
     "next": "16.4.2",
