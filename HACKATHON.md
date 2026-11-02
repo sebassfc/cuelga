@@ -8,7 +8,7 @@ Ficha completa y fuentes en `../HACKATHON.md`. La decisión y el ranking de idea
 | Tema | Build for Your World |
 | **Cierre** | **mié 4-nov-2026, 20:00 Monterrey** (21:00 ET). Entrega completa antes del **mar 3-nov, 23:59** |
 | Regla clave | Solo trabajo nuevo: todo este repo se escribió desde el 29-oct-2026, dentro del periodo de construcción (27-oct → 4-nov) |
-| Repo | Debe ser público al entregar (todavía no se publica) |
+| Repo | Público desde el 2-nov: github.com/sebassfc/cuelga |
 | Video | ≤3 min, voz de Sebastián, con subtítulos |
 
 ## Modelos: decisión del 29-oct
@@ -26,7 +26,7 @@ Tu cuenta de dev.meta.ai está bloqueada por un chequeo de edad de Meta. El bot 
 |---|---|---|
 | Impact (30%) | Problema medido: Nuevo León tuvo 991 víctimas de extorsión en 2025 (4º nacional, SESNSP vía Grupo Animal). Recreación con la familia de Sebastián | Falta la recreación |
 | Uso de Meta (25%) | Spark Open **escucha** el audio y separa llamante/receptor con contexto entre trozos. El agente actúa **durante** la llamada | El oído está, falta probarlo con key |
-| Profundidad (20%) | Léxico como piso determinista. Solo cuenta la cita textual del modelo (`citaEnTurno`). Máquina de estados con propiedades probadas (fast-check). Topes de gasto en código. 46 pruebas | ✔︎ |
+| Profundidad (20%) | Léxico como piso determinista. Solo cuenta la cita textual del modelo (`citaEnTurno`). Máquina de estados con propiedades probadas (fast-check). Topes de gasto en código. 53 pruebas | ✔︎ |
 | Demo (25%) | Pantalla "ESTÁ A SALVO, CUELGA" mientras el "comandante" sigue hablando. Falla visible: no contesta → 2º contacto → 089 | ✔︎ UI local (1-nov): `/escuchar` y `/familiar/…`. Falta el deploy |
 
 ## Real vs simulado (para el video y el write-up)
@@ -74,7 +74,7 @@ Faltan dos cosas:
 |---|---|
 | Jue 29 ✔︎ | Núcleo, cliente multi-proveedor, oído con open weights, humo, eval, build |
 | Vie 30 | Keys de Baseten/OpenRouter. `pnpm humo audio/prueba.wav` con audio regio por altavoz. **Puerta 14:00** |
-| Sáb 31 | (Expediente del Tec.) UI de escucha: grabar trozos de 6 s, panel de etapas y API route |
+| Sáb 31 | UI de escucha: grabar trozos de 6 s, panel de etapas y API route |
 | Dom 1 ✔︎ | Pantalla de escucha (micrófono, archivo o guion), página del familiar, verificación en paralelo, falla visible y la métrica de segundos hasta «a salvo». La recreación pasa al mar 3 |
 | Lun 2 | Falla visible + expediente. Deploy público. README para jueces. Medir segundos hasta "a salvo" |
 | Mar 3 | Video, write-up y **entrega completa** |
