@@ -1,0 +1,33 @@
+# Mantiene despierta la demo durante el juicio del hackathon.
+# El plan gratis de Render se duerme tras 15 minutos sin visitas y la primera visita espera cerca de un minuto;
+# un ping cada 10 minutos lo evita. Solo actúa del 4 al 9 de noviembre de 2026 (hora de Monterrey).
+# Después de esa fecha no hace nada y se puede borrar.
+name: Despertar la demo
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      forzar:
+        description: "Hacer el ping aunque estemos fuera de la ventana del juicio"
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping a cuelga.onrender.com
+        env:
+          FORZAR: ${{ inputs.forzar }}
+        run: |
+          hoy=$(TZ=America/Monterrey date +%F)
+          if [[ "$FORZAR" != "true" && ( "$hoy" < "2026-11-04" || "$hoy" > "2026-11-09" ) ]]; then
+            echo "Fuera de la ventana del juicio ($hoy): no hago nada."
+            exit 0
+          fi
+          curl -fsS --retry 2 --max-time 90 -o /dev/null -w "HTTP %{http_code} en %{time_total} s\n" https://cuelga.onrender.com/
