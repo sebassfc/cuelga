@@ -94,14 +94,16 @@ export function EstadoLlamada({
   );
 }
 
-export function PistaEtapas({ etapas }: { etapas: VistaEscucha["etapas"] }) {
+export function PistaEtapas({ vista }: { vista: VistaEscucha }) {
   const lista = ETAPAS.filter((e) => e !== "ninguna");
+  // También las etapas de cada frase: cuando ya está a salvo, la política deja de sumar etapas pero la transcripción sigue.
+  const etapas = new Set<string>([...vista.etapas, ...vista.turnos.map((t) => t.etapa)]);
   return (
     <div>
       <p className="text-[0.8125rem] font-semibold tracking-[0.14em] text-papel/50 uppercase">El guion de la extorsión</p>
       <ol className="mt-2 grid grid-cols-5 gap-1.5" aria-label="Etapas del guion de extorsión que se han oído">
         {lista.map((e) => {
-          const oida = etapas.includes(e);
+          const oida = etapas.has(e);
           return (
             <li
               key={e}

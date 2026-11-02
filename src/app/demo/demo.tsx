@@ -142,7 +142,7 @@ export function Demo() {
                 textoInactivo="Escuchando la llamada…"
                 subtitulo={vista.mensaje ? INGLES_MENSAJE[vista.mensaje.clave] : undefined}
               />
-              <PistaEtapas etapas={vista.etapas} />
+              <PistaEtapas vista={vista} />
               <Transcripcion turnos={vista.turnos} traduccion={(t) => INGLES[t]} max="max-h-64" />
               <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
                 <Metricas vista={vista} enviando={llamada.enviando} />

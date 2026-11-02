@@ -210,7 +210,7 @@ function Panel({ familia, alEditar }: { familia: Familia; alEditar: () => void }
               activa={activa}
               textoInactivo={modo === "mic" ? "Escuchando. Pon la llamada en altavoz cerca de este dispositivo." : "Escuchando la llamada…"}
             />
-            <PistaEtapas etapas={vista.etapas} />
+            <PistaEtapas vista={vista} />
             <Transcripcion turnos={vista.turnos} />
             <Metricas vista={vista} enviando={enviando} />
           </section>
