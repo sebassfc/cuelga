@@ -4,7 +4,9 @@
 
 Built for the Meta Global AI Developer Hackathon (Indie track, Oct 26 – Nov 4, 2026). Every line in this repo was written during the event, starting Oct 29, 2026.
 
-**Live demo:** being deployed on Render; the link goes here as soon as it is up.
+**Live demo:** https://cuelga.onrender.com/escuchar
+
+It runs on a free Render instance. After 15 idle minutes it sleeps, so the first visit can take about a minute to load; waking up also clears calls in progress.
 
 ## Try it in 2 minutes (no phone needed)
 
@@ -20,7 +22,7 @@ The app is in Mexican Spanish, because that is where this scam happens. Use two 
 4. Back in the first tab, press **Guion de ejemplo**. A synthetic virtual-kidnapping call plays turn by turn, and the five script stages light up as they are heard.
 5. Within a few seconds Ana's tab asks **"¿Estás bien?"** Press **Sí, estoy bien**. The first tab turns green: **"ANA ESTÁ A SALVO. CUELGA."**, along with the seconds it took.
 
-**The unhappy path:** press **Nueva llamada**, run the script again and don't answer in Ana's tab. After the wait time, Cuelga asks Lucía. If nobody answers, it tells you to hang up and shows **Llamar al 089**, Mexico's anonymous reporting line.
+**The unhappy path:** press **Ya colgué**, then **Nueva llamada**, run the script again and don't answer in Ana's tab. After the wait time, Cuelga asks Lucía. If nobody answers, it tells you to hang up and shows **Llamar al 089**, Mexico's anonymous reporting line.
 
 **With real audio:** **Escuchar llamada** listens through the microphone (put a call on speaker next to the laptop), and **Usar un audio grabado** takes any audio file. These two modes call the Meta model; the script mode only uses it to double-check each turn.
 
@@ -69,6 +71,7 @@ Virtual kidnapping is a common extortion script in Mexico. A caller plays a cryi
 |---|---|---|
 | Detection on 8 synthetic scripts (4 scams, 4 normal calls) | 4/4 scams caught, 0/4 false alarms. Lexicon alone alerts at turn 2.5 on average, lexicon + Muse Spark Open at turn 1.0 | `pnpm eval` and `pnpm eval --modelo`, Oct 29. The same person wrote the scripts and the lexicon, so this is a smoke test, not a benchmark |
 | End to end in the browser, script sv-01 | Alert at 2–3 s, "ESTÁ A SALVO" at 19 s | Local run, Nov 1 |
+| Same test on the live demo | Alert at 2 s, "ESTÁ A SALVO" at 18 s, $0.013 of model calls. Nobody answering (20 s wait): Lucía asked after about 21 s, the 089 screen 20 s later | Render free instance, Nov 2 |
 | Listening to audio | A 23 s call with synthetic macOS voices was transcribed and all 5 stages were detected, for $0.027 | Local run, Nov 1 |
 
 ## Known limits

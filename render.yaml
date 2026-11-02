@@ -12,7 +12,8 @@ services:
     plan: free
     numInstances: 1
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
-    startCommand: pnpm start -H 0.0.0.0
+    # Straight to the Next binary: through pnpm, Corepack downloads pnpm again on every wake-up (12 s on Nov 2).
+    startCommand: node_modules/.bin/next start -H 0.0.0.0
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
