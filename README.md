@@ -67,6 +67,7 @@ Virtual kidnapping is a common extortion script in Mexico. A caller plays a cryi
 | End to end in the browser, script sv-01 | Alert at 2–3 s, "ESTÁ A SALVO" at 19 s | Local run, Nov 1 |
 | Same test on the live demo | Alert at 2 s, "ESTÁ A SALVO" at 18 s, $0.013 of model calls. Nobody answering (20 s wait): Lucía asked after about 21 s, the 089 screen 20 s later | Render free instance, Nov 2 |
 | Listening to audio | A 23 s call with synthetic macOS voices was transcribed and all 5 stages were detected, for $0.027 | Local run, Nov 1 |
+| Listening to audio on the live demo | Same 23 s synthetic call sent in 8 s chunks: transcribed with speaker labels, alert on the first chunk, 4.9–8.9 s per chunk, 2 of 5 stages tagged, $0.026 | Render free instance, Nov 2 |
 
 ## Known limits
 
