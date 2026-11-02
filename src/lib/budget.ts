@@ -80,3 +80,32 @@ export class Presupuesto {
     this.llamadas.push({ etiqueta, usd });
   }
 }
+
+/** Tope por llamada que además descuenta del tope total del servidor: se rechaza si cualquiera de los dos se pasa. */
+export class PresupuestoAnidado extends Presupuesto {
+  constructor(
+    topeUsd: number,
+    private readonly padre: Presupuesto,
+  ) {
+    super(topeUsd);
+  }
+
+  override reservar(usdEstimado: number): () => void {
+    const liberarPadre = this.padre.reservar(usdEstimado);
+    try {
+      const liberarPropio = super.reservar(usdEstimado);
+      return () => {
+        liberarPropio();
+        liberarPadre();
+      };
+    } catch (e) {
+      liberarPadre();
+      throw e;
+    }
+  }
+
+  override registrar(etiqueta: string, usd: number) {
+    this.padre.registrar(etiqueta, usd);
+    super.registrar(etiqueta, usd);
+  }
+}
