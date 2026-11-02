@@ -7,9 +7,9 @@ services:
     name: cuelga
     runtime: node
     region: oregon
-    # Paid instance: free ones sleep after 15 idle minutes, which wipes in-flight calls
-    # and makes judges wait for a cold start.
-    plan: 0.5c-512mb
+    # Free instance: it sleeps after 15 idle minutes, so the first visit waits for a cold start
+    # and a sleep wipes in-flight calls. 0.5c-512mb avoids both but needs a card on file.
+    plan: free
     numInstances: 1
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
     startCommand: pnpm start -H 0.0.0.0
