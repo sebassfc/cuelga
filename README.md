@@ -4,27 +4,21 @@
 
 Built for the Meta Global AI Developer Hackathon (Indie track, Oct 26 – Nov 4, 2026). Every line in this repo was written during the event, starting Oct 29, 2026.
 
-**Live demo:** https://cuelga.onrender.com/escuchar
+**Live demo:** https://cuelga.onrender.com · **Guided demo (1 minute, no setup):** https://cuelga.onrender.com/demo
 
 It runs on a free Render instance. After 15 idle minutes it sleeps, so the first visit can take about a minute to load; waking up also clears calls in progress.
 
-## Try it in 2 minutes (no phone needed)
+## Try it in 1 minute (no phone needed)
 
-The app is in Mexican Spanish, because that is where this scam happens. Use two browser tabs: one plays the person who picked up the call at home, the other plays the relative's phone.
+The app is in Mexican Spanish, because that is where this scam happens. The guided demo adds English subtitles.
 
-1. Open the demo and press **Abrir Cuelga**.
-2. Fill in the family form:
-   - **¿Quién contesta en casa?** `Abuela Mari`
-   - **¿A quién podrían decir que tienen?** `Ana`
-   - **Segundo contacto** `Lucía` (optional, but it unlocks the escalation path)
-   - Tick the consent box, then press **Guardar**.
-3. Under **Teléfonos de la familia**, press **Abrir aquí** next to Ana. A new tab opens as Ana's phone. Leave it open. (Or scan the QR code with a real phone.)
-4. Back in the first tab, press **Guion de ejemplo**. A synthetic virtual-kidnapping call plays turn by turn, and the five script stages light up as they are heard.
-5. Within a few seconds Ana's tab asks **"¿Estás bien?"** Press **Sí, estoy bien**. The first tab turns green: **"ANA ESTÁ A SALVO. CUELGA."**, along with the seconds it took.
+1. Open **/demo**. The house screen is on the left; Ana's phone is on the right.
+2. Press **Empezar la llamada de ejemplo**. A synthetic virtual-kidnapping call plays line by line, and the five script stages light up as they are heard.
+3. Within a few seconds Ana's phone asks **"¿Estás bien?"** Press **Sí, estoy bien**. The house screen turns green: **"Ana ESTÁ A SALVO. CUELGA."**, with the seconds it took.
 
-**The unhappy path:** press **Ya colgué**, then **Nueva llamada**, run the script again and don't answer in Ana's tab. After the wait time, Cuelga asks Lucía. If nobody answers, it tells you to hang up and shows **Llamar al 089**, Mexico's anonymous reporting line.
+**The unhappy path:** press **Otra vez** and don't answer on Ana's phone. After 15 seconds Cuelga asks Lucía (the demo switches to her phone). If nobody answers, it tells you to hang up and shows **Llamar al 089**, Mexico's anonymous reporting line.
 
-**With real audio:** **Escuchar llamada** listens through the microphone (put a call on speaker next to the laptop), and **Usar un audio grabado** takes any audio file. These two modes call the Meta model; the script mode only uses it to double-check each turn.
+**With your own family:** **/escuchar** sets up who answers at home, who to protect and a second contact, then shows a QR code for each relative's phone. **Escuchar una llamada** listens through the microphone (put a call on speaker next to the laptop), and **Usar un audio grabado** takes any audio file. These two modes call the Meta model; the scripted call only uses it to double-check each line.
 
 ## The problem
 

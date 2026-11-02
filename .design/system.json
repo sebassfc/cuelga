@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "direction": "Línea en calma",
+  "mechanism": "A calm paper page on which the real product floats as dark devices: the house screen and the relative's phone. The only saturated green on the whole site is the moment someone is confirmed safe.",
+  "candidates": {
+    "chosen": "Línea en calma: warm paper ground, near-black green ink, dark device surfaces, one signal green spent on 'a salvo'.",
+    "rejected": [
+      "Noche de la llamada (full-dark site with green glow): reads as one more dark AI-security SaaS, and the dark product panels would vanish into a dark page.",
+      "Cartel cívico (riso poster, Mexican color blocks): makes a crime that terrifies grandparents look festive, is harder to read under stress, and buries the one green moment among many colors."
+    ]
+  },
+  "signature_move": "The hero is the product running: a scripted call types into the house screen, the stage track lights up, Ana's phone asks '¿Estás bien?', she taps yes and the house screen floods green. Spent once on the landing; /demo is the same thing for real.",
+  "locked": ["palette", "type_families", "scale_steps", "radius", "shadow", "accent_rule", "signature_move"],
+  "tokens": {
+    "base_unit": 4,
+    "space_tailwind": [2, 3, 4, 6, 8, 12, 16, 24, 32],
+    "type": {
+      "display": { "family": "Bricolage Grotesque", "host": "google (next/font)", "weights": [700, 800], "tracking": "-0.03em", "lh": 1.0 },
+      "text": { "family": "Onest", "host": "google (next/font)", "weights": [400, 500, 600, 700], "lh": 1.5 },
+      "steps": {
+        "hero": "clamp(2.75rem, 1.6rem + 4.6vw, 5.25rem)",
+        "section": "clamp(2rem, 1.4rem + 2.4vw, 3.25rem)",
+        "body": "1.0625rem",
+        "label": "0.8125rem uppercase tracking 0.14em"
+      }
+    },
+    "color": {
+      "papel": "#F3F0E8",
+      "papel-2": "#E8E3D6",
+      "tinta": "#0E1411",
+      "tinta-2": "#4A544E",
+      "noche": "#0B0F0D",
+      "noche-2": "#151B18",
+      "noche-3": "#1F2723",
+      "borde": "#2B3430",
+      "senal": "#1FD17A",
+      "alerta": "#FF7A1A",
+      "peligro": "#F04A3E"
+    },
+    "accent_rule": "senal (green) only means 'safe': the a-salvo screen, the 'connected' dot, the brand dot. alerta and peligro only appear inside product UI to show call states. Primary CTA is a tinta pill with papel text.",
+    "radius": { "pill": "9999px", "card": "1.25rem", "device": "1.75rem", "phone": "2.75rem" },
+    "shadow": "One soft drop shadow, only on floating devices: 0 30px 60px -20px rgb(14 20 17 / 0.45). Everything else is flat.",
+    "motion": {
+      "policy": "CSS keyframes and transitions only, every entrance behind motion-safe; loops stop under prefers-reduced-motion",
+      "ease": "cubic-bezier(0.23, 1, 0.32, 1)",
+      "jobs": ["hero product loop tells the story", "listening pulse shows the mic is live", "phone ring shows a question is waiting", "green flood is the payoff"]
+    }
+  },
+  "brand": {
+    "name": "cuelga (lowercase wordmark)",
+    "mark": "A handset drawn as a bold C, with a signal-green dot in its mouth: the call, and the person confirmed safe. Ink on paper, paper on night. Never green handset on its own: that reads as WhatsApp.",
+    "voice": "Calm, short, imperative when it matters. Never says pay, deposit or negotiate."
+  },
+  "references_measured_2026_11_02": {
+    "retellai.com (YC W24)": "inset rounded hero card with an atmospheric gradient, centered 2-line serif headline at ~6% of width, small uppercase eyebrow, floating 'try the live demo' widget bottom-right, logo strip directly under the card, black pill CTA in the nav",
+    "vapi.ai": "full-bleed atmospheric photo, left 2-line headline, two pills, and a live 'Start call' control inside the hero itself",
+    "bland.ai (YC S23)": "white ground, left headline 'Voice AI for the calls that can't go wrong', one warm accent CTA, product cards on the right, logo strip under the fold",
+    "shared_moves": ["headline 5-9 words", "a way to try the product from the hero", "proof strip right under the hero", "bento where every card shows the product working", "FAQ before the final CTA"],
+    "transposed": "Cuelga has no customers to show, so the strip says 'Construido con' (real stack), never 'trusted by'."
+  },
+  "components_21st": {
+    "983 Hero Pill (originui)": "eyebrow pill in the hero",
+    "1368 Feature Section (ayushmxxn)": "auto-advancing how-it-works steps with progress; images replaced by live product states; framer-motion replaced by CSS",
+    "43172 Marketing Feature Bento (isaiahbjork)": "six-column bento, every card carries a small working visual; visuals rebuilt from Cuelga's own UI and measured numbers",
+    "26803 FAQ Accordion Reveal (Mohammad Shehadeh, MIT)": "pill badge, two-tone headline, bordered cards that tint when open; Radix + motion replaced by a small client accordion"
+  },
+  "sections": [
+    { "id": "hero", "ground": "papel around an inset noche-to-green card", "anchor": "centered headline, devices bleeding out of the card bottom" },
+    { "id": "construido", "ground": "papel", "anchor": "one quiet row of wordmarks" },
+    { "id": "problema", "ground": "papel", "anchor": "one giant number, sparse" },
+    { "id": "como", "ground": "papel-2", "anchor": "auto-advancing steps left, live state right" },
+    { "id": "bento", "ground": "papel", "anchor": "six-column bento of working visuals" },
+    { "id": "faq", "ground": "papel", "anchor": "centered narrow accordion" },
+    { "id": "cierre", "ground": "noche", "anchor": "big CTA + footer" }
+  ]
+}

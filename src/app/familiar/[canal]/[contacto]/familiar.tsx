@@ -1,16 +1,22 @@
 "use client";
 
 import { use, useEffect, useRef, useState } from "react";
+import { Marca } from "@/components/marca";
 import type { VistaFamiliar } from "@/lib/llamada";
 
 type Respuesta = { estaBien: boolean } | { noSe: true };
 
-/** Teléfono del familiar: espera en silencio y solo suena cuando alguien necesita saber que está bien. */
 export function Familiar({ params, searchParams }: { params: Promise<{ canal: string; contacto: string }>; searchParams: Promise<{ n?: string; de?: string }> }) {
   const { canal, contacto } = use(params);
   const { n, de } = use(searchParams);
-  const nombre = n?.slice(0, 40) || "tú";
-  const quien = de?.slice(0, 40) || "tu familia";
+  return <Telefono canal={canal} contacto={contacto} nombre={n?.slice(0, 40) || "tú"} quien={de?.slice(0, 40) || "tu familia"} />;
+}
+
+/**
+ * Teléfono del familiar: espera en silencio y solo suena cuando alguien necesita saber que está bien.
+ * `enMarco` lo dibuja dentro del teléfono de la demo, sin sonido y sin ocupar toda la ventana.
+ */
+export function Telefono({ canal, contacto, nombre, quien, enMarco = false }: { canal: string; contacto: string; nombre: string; quien: string; enMarco?: boolean }) {
   const api = `/api/familiar/${encodeURIComponent(canal)}/${encodeURIComponent(contacto)}`;
 
   const [pregunta, setPregunta] = useState<NonNullable<VistaFamiliar> | null>(null);
@@ -42,7 +48,7 @@ export function Familiar({ params, searchParams }: { params: Promise<{ canal: st
 
   // Vibra y suena cada 3 s mientras haya una pregunta sin contestar.
   useEffect(() => {
-    if (!idPendiente) return;
+    if (!idPendiente || enMarco) return;
     const avisar = () => {
       navigator.vibrate?.([400, 150, 400, 150, 400]);
       const ctx = audioRef.current;
@@ -60,7 +66,7 @@ export function Familiar({ params, searchParams }: { params: Promise<{ canal: st
     avisar();
     const t = setInterval(avisar, 3_000);
     return () => clearInterval(t);
-  }, [idPendiente]);
+  }, [idPendiente, enMarco]);
 
   async function activarAvisos() {
     // El navegador solo deja sonar audio después de un toque; la pantalla encendida evita que se duerma la página.
@@ -85,20 +91,26 @@ export function Familiar({ params, searchParams }: { params: Promise<{ canal: st
     }).catch(() => null);
   }
 
+  const alto = enMarco ? "h-full" : "min-h-dvh";
+  const titulo = enMarco ? "text-3xl" : "text-4xl sm:text-5xl";
+
   if (pendiente) {
     const t = pendiente.texto;
     return (
-      <main className="flex min-h-dvh flex-col justify-center gap-6 border-8 border-orange-500 bg-zinc-950 px-5 py-8">
-        <h1 className="text-5xl leading-tight font-black">{t.titulo}</h1>
-        <p className="text-xl">{t.detalle}</p>
-        <button onClick={() => responder({ estaBien: true })} className="rounded-3xl bg-green-500 px-6 py-7 text-2xl font-black text-black">
+      <main className={`${alto} flex flex-col justify-center gap-5 bg-noche px-5 py-8 ring-8 ring-alerta ring-inset motion-safe:animate-inundar`}>
+        <span className="grid size-14 place-items-center rounded-full bg-alerta motion-safe:animate-timbre" aria-hidden="true">
+          <Marca tono="papel" className="size-9" />
+        </span>
+        <h1 className={`font-display leading-none font-extrabold tracking-[-0.03em] ${enMarco ? "text-5xl" : "text-6xl"}`}>{t.titulo}</h1>
+        <p className={enMarco ? "text-base text-papel/80" : "text-xl text-papel/80"}>{t.detalle}</p>
+        <button onClick={() => responder({ estaBien: true })} className="rounded-full bg-senal px-6 py-5 font-display text-2xl font-extrabold text-tinta">
           {t.si}
         </button>
-        <button onClick={() => responder({ estaBien: false })} className="rounded-3xl bg-red-600 px-6 py-5 text-xl font-bold">
+        <button onClick={() => responder({ estaBien: false })} className="rounded-full bg-peligro px-6 py-4 text-lg font-bold text-tinta">
           {t.no}
         </button>
         {t.noSe && (
-          <button onClick={() => responder({ noSe: true })} className="rounded-3xl border border-zinc-600 px-6 py-4 text-lg">
+          <button onClick={() => responder({ noSe: true })} className="rounded-full border border-papel/30 px-6 py-3 text-base">
             {t.noSe}
           </button>
         )}
@@ -106,35 +118,52 @@ export function Familiar({ params, searchParams }: { params: Promise<{ canal: st
     );
   }
 
+  const bien = respondida && "estaBien" in respondida.r ? respondida.r.estaBien : null;
+
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-5 py-8">
-      <p className="text-sm font-semibold tracking-widest text-zinc-400 uppercase">Cuelga · teléfono de {nombre}</p>
-      {respondida && "estaBien" in respondida.r ? (
-        respondida.r.estaBien ? (
-          <h1 className="text-4xl font-black">Listo. Ya le avisamos a {quien} que estás bien.</h1>
-        ) : (
+    <main className={`${alto} mx-auto flex max-w-md flex-col gap-6 bg-noche px-5 py-8`}>
+      <header className="flex items-center gap-2">
+        <Marca tono="papel" className="size-7" />
+        <span className="text-[0.8125rem] font-semibold tracking-[0.14em] text-papel/60 uppercase">Teléfono de {nombre}</span>
+      </header>
+
+      <div className="flex flex-1 flex-col justify-center gap-5">
+        {bien === true ? (
           <>
-            <h1 className="text-4xl font-black">Avisamos que necesitas ayuda.</h1>
-            <a href="tel:911" className="rounded-3xl bg-white px-6 py-5 text-center text-2xl font-black text-black">
+            <span className="grid size-16 place-items-center rounded-full bg-senal text-3xl font-black text-tinta motion-safe:animate-inundar" aria-hidden="true">
+              ✓
+            </span>
+            <h1 className={`font-display leading-tight font-extrabold tracking-[-0.02em] ${titulo}`}>Listo. Ya le avisamos a {quien} que estás bien.</h1>
+          </>
+        ) : bien === false ? (
+          <>
+            <h1 className={`font-display leading-tight font-extrabold tracking-[-0.02em] ${titulo}`}>Avisamos que necesitas ayuda.</h1>
+            <a href="tel:911" className="rounded-full bg-papel px-6 py-5 text-center font-display text-2xl font-extrabold text-tinta">
               Llamar al 911
             </a>
           </>
-        )
-      ) : (
-        <>
-          <h1 className="text-4xl leading-tight font-black">Deja esta página abierta.</h1>
-          <p className="text-lg text-zinc-300">
-            Si alguien llama a {quien} diciendo que te tiene, aquí te preguntaremos si estás bien. Contestas con un toque, sin interrumpir la llamada.
-          </p>
-        </>
-      )}
-      {!avisosActivos && (
-        <button onClick={activarAvisos} className="rounded-2xl bg-white px-6 py-4 text-lg font-bold text-black">
+        ) : (
+          <>
+            <span className="relative grid size-16 place-items-center" aria-hidden="true">
+              <span className="absolute inset-0 rounded-full bg-senal/20 motion-safe:animate-latir" />
+              <span className="size-5 rounded-full bg-senal" />
+            </span>
+            <h1 className={`font-display leading-tight font-extrabold tracking-[-0.02em] ${titulo}`}>Deja esta página abierta.</h1>
+            <p className={enMarco ? "text-base text-papel/70" : "text-lg text-papel/70"}>
+              Si alguien llama a {quien} diciendo que te tiene, aquí te preguntamos si estás bien. Contestas con un toque, sin interrumpir la llamada.
+            </p>
+          </>
+        )}
+      </div>
+
+      {!enMarco && !avisosActivos && (
+        <button onClick={activarAvisos} className="rounded-full bg-papel px-6 py-4 text-lg font-bold text-tinta">
           Activar sonido y vibración
         </button>
       )}
-      <p className={`text-sm ${conectado === false ? "text-red-400" : "text-zinc-500"}`}>
-        {conectado === null ? "Conectando…" : conectado ? "Conectado. Revisando cada 2 segundos." : "Sin conexión. Reintentando…"}
+      <p className={`flex items-center gap-2 text-sm ${conectado === false ? "text-peligro" : "text-papel/50"}`}>
+        <span className={`size-2 rounded-full ${conectado === false ? "bg-peligro" : conectado ? "bg-senal" : "bg-papel/40"}`} />
+        {conectado === null ? "Conectando…" : conectado ? "Conectado" : "Sin conexión. Reintentando…"}
       </p>
     </main>
   );

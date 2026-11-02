@@ -1,15 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
-import guionEjemplo from "../../../data/guiones/sv-01-nieta-llorando.json";
-import { desdeArchivo, desdeMicrofono, Emisor, type Fuente } from "@/lib/cliente/audio";
+import { Barra } from "@/components/barra";
+import { EstadoLlamada, Metricas, PantallaASalvo, PistaEtapas, Transcripcion } from "@/components/llamada";
+import { Marca } from "@/components/marca";
 import { enlaceFamiliar, guardarFamilia, leerFamilia, nuevoCanal, type Familia } from "@/lib/cliente/familia";
-import type { ConfigLlamada, TurnoVista, VistaEscucha } from "@/lib/llamada";
-import type { Fase } from "@/lib/policy";
-import { ETAPA_INFO, ETAPAS } from "@/lib/stages";
-
-type Modo = "mic" | "archivo" | "guion";
+import { useLlamada, type Modo } from "@/lib/cliente/usar-llamada";
 
 export function Escucha() {
   // undefined = todavía no se lee localStorage (evita parpadeo y desajuste de hidratación)
@@ -22,7 +20,7 @@ export function Escucha() {
     setEditando(!f);
   }, []);
 
-  if (familia === undefined) return <main className="min-h-dvh" />;
+  if (familia === undefined) return <main className="min-h-dvh bg-noche" />;
   if (editando || !familia) {
     return (
       <ConfigFamilia
@@ -37,6 +35,12 @@ export function Escucha() {
   }
   return <Panel familia={familia} alEditar={() => setEditando(true)} />;
 }
+
+const enlaceDemo = (
+  <Link href="/demo" className="rounded-full px-3 py-2 text-papel/70 hover:text-papel">
+    Ver la demo
+  </Link>
+);
 
 // --- configuración de la familia ---
 
@@ -63,382 +67,209 @@ function ConfigFamilia({ inicial, alGuardar }: { inicial: Familia | null; alGuar
   }, [base]);
 
   const valido = quienEscucha.trim() && protegido.trim() && acepta && base;
+  const nombres = [protegido.trim(), respaldo.trim()].filter(Boolean);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-xl flex-col gap-6 px-4 py-8">
-      <header>
-        <p className="text-sm font-semibold tracking-widest text-zinc-400 uppercase">Cuelga</p>
-        <h1 className="mt-1 text-3xl font-bold">Configura a tu familia</h1>
-        <p className="mt-2 text-zinc-400">Se guarda solo en este dispositivo. Toma un minuto y se hace una vez.</p>
-      </header>
-      <form
-        className="flex flex-col gap-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!valido) return;
-          alGuardar({
-            canal: inicial?.canal ?? nuevoCanal(),
-            quienEscucha: quienEscucha.trim(),
-            protegido: protegido.trim(),
-            respaldo: respaldo.trim() || null,
-            esperaSeg,
-            base: base.trim(),
-          });
-        }}
-      >
-        <Campo etiqueta="¿Quién contesta en casa?" ayuda="Así lo verán tus familiares en su teléfono.">
-          <input className={entrada} value={quienEscucha} onChange={(e) => setQuienEscucha(e.target.value)} placeholder="Abuela Mari" maxLength={40} required />
-        </Campo>
-        <Campo etiqueta="¿A quién podrían decir que tienen?" ayuda="A esta persona le preguntaremos en silencio si está bien.">
-          <input className={entrada} value={protegido} onChange={(e) => setProtegido(e.target.value)} placeholder="Ana" maxLength={40} required />
-        </Campo>
-        <Campo etiqueta="Segundo contacto (opcional)" ayuda="Si la primera persona no contesta, le preguntamos a esta.">
-          <input className={entrada} value={respaldo} onChange={(e) => setRespaldo(e.target.value)} placeholder="Lucía, mamá de Ana" maxLength={40} />
-        </Campo>
-        <Campo etiqueta="¿Cuánto esperar cada respuesta?">
-          <select className={entrada} value={esperaSeg} onChange={(e) => setEsperaSeg(Number(e.target.value))}>
-            <option value={20}>20 segundos</option>
-            <option value={30}>30 segundos</option>
-            <option value={60}>60 segundos</option>
-          </select>
-        </Campo>
-        <label className="flex items-start gap-3 rounded-xl border border-zinc-700 p-4">
-          <input type="checkbox" className="mt-1 size-5" checked={acepta} onChange={(e) => setAcepta(e.target.checked)} />
-          <span>
-            {protegido.trim() || "Tus familiares"}
-            {respaldo.trim() ? ` y ${respaldo.trim()}` : ""} saben que Cuelga les puede preguntar si están bien, y están de acuerdo.
-          </span>
-        </label>
-        <details className="text-sm text-zinc-400">
-          <summary className="cursor-pointer">Dirección para los teléfonos</summary>
-          <input className={`${entrada} mt-2`} value={base} onChange={(e) => setBase(e.target.value)} placeholder="https://…" />
-          <p className="mt-1">Los enlaces de los familiares apuntan aquí. En una red local, usa la IP de esta computadora.</p>
-        </details>
-        <button type="submit" disabled={!valido} className="rounded-2xl bg-white px-6 py-4 text-lg font-bold text-black disabled:opacity-40">
-          Guardar
-        </button>
-      </form>
+    <main className="min-h-dvh bg-noche text-papel">
+      <Barra claro={false} derecha={enlaceDemo} />
+      <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 pt-6 pb-16">
+        <header>
+          <h1 className="font-display text-4xl leading-[1.02] font-extrabold tracking-[-0.03em] sm:text-5xl">Configura Cuelga para tu familia.</h1>
+          <p className="mt-3 text-lg text-papel/70">
+            Se guarda solo en este dispositivo. ¿Solo quieres verlo funcionar?{" "}
+            <Link href="/demo" className="font-semibold text-papel underline underline-offset-4">
+              Mira la demo de 1 minuto
+            </Link>
+            .
+          </p>
+        </header>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!valido) return;
+            alGuardar({
+              canal: inicial?.canal ?? nuevoCanal(),
+              quienEscucha: quienEscucha.trim(),
+              protegido: protegido.trim(),
+              respaldo: respaldo.trim() || null,
+              esperaSeg,
+              base: base.trim(),
+            });
+          }}
+        >
+          <Bloque n={1} titulo="En casa">
+            <Campo etiqueta="¿Quién contesta el teléfono?" ayuda="Así lo verán tus familiares en su teléfono.">
+              <input className={entrada} value={quienEscucha} onChange={(e) => setQuienEscucha(e.target.value)} placeholder="Abuela Mari" maxLength={40} required />
+            </Campo>
+          </Bloque>
+          <Bloque n={2} titulo="A quién protegemos">
+            <Campo etiqueta="¿A quién podrían decir que tienen?" ayuda="A esta persona le preguntamos en silencio si está bien.">
+              <input className={entrada} value={protegido} onChange={(e) => setProtegido(e.target.value)} placeholder="Ana" maxLength={40} required />
+            </Campo>
+            <Campo etiqueta="Segundo contacto (opcional)" ayuda="Si la primera persona no contesta, le preguntamos a esta.">
+              <input className={entrada} value={respaldo} onChange={(e) => setRespaldo(e.target.value)} placeholder="Lucía, mamá de Ana" maxLength={40} />
+            </Campo>
+          </Bloque>
+          <Bloque n={3} titulo="Cuánto esperamos cada respuesta">
+            <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Espera por respuesta">
+              {[20, 30, 60].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  role="radio"
+                  aria-checked={esperaSeg === s}
+                  onClick={() => setEsperaSeg(s)}
+                  className={`rounded-full py-3 font-semibold tabular-nums ${esperaSeg === s ? "bg-papel text-tinta" : "bg-noche-3 text-papel/70"}`}
+                >
+                  {s} s
+                </button>
+              ))}
+            </div>
+          </Bloque>
+          <label className="flex cursor-pointer items-start gap-3 rounded-tarjeta border border-borde p-4">
+            <input type="checkbox" className="mt-1 size-5 accent-senal" checked={acepta} onChange={(e) => setAcepta(e.target.checked)} />
+            <span className="text-papel/85">
+              {nombres.length ? nombres.join(" y ") : "Mis familiares"} {nombres.length > 1 ? "saben" : "sabe"} que Cuelga les puede preguntar si están bien, y están de acuerdo.
+            </span>
+          </label>
+          <details className="text-sm text-papel/50">
+            <summary className="cursor-pointer">Dirección para los teléfonos</summary>
+            <input className={`${entrada} mt-2`} value={base} onChange={(e) => setBase(e.target.value)} placeholder="https://…" />
+            <p className="mt-1">Los enlaces de los familiares apuntan aquí. En una red local, usa la IP de esta computadora.</p>
+          </details>
+          <button type="submit" disabled={!valido} className="rounded-full bg-papel px-6 py-4 font-display text-xl font-extrabold text-tinta disabled:opacity-50">
+            Guardar y conectar teléfonos
+          </button>
+        </form>
+      </div>
     </main>
   );
 }
 
-const entrada = "w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-lg outline-none focus:border-zinc-300";
+const entrada = "w-full rounded-xl border border-borde bg-noche px-4 py-3 text-lg text-papel placeholder:text-papel/30 outline-none focus:border-papel/60";
+
+function Bloque({ n, titulo, children }: { n: number; titulo: string; children: React.ReactNode }) {
+  return (
+    <fieldset className="flex flex-col gap-4 rounded-tarjeta bg-noche-2 p-5">
+      <legend className="sr-only">{titulo}</legend>
+      <p className="flex items-center gap-3 font-semibold" aria-hidden="true">
+        <span className="grid size-7 place-items-center rounded-full bg-papel text-sm font-bold text-tinta tabular-nums">{n}</span>
+        {titulo}
+      </p>
+      {children}
+    </fieldset>
+  );
+}
 
 function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="font-semibold">{etiqueta}</span>
+      <span className="text-papel/85">{etiqueta}</span>
       {children}
-      {ayuda && <span className="text-sm text-zinc-400">{ayuda}</span>}
+      {ayuda && <span className="text-sm text-papel/45">{ayuda}</span>}
     </label>
   );
 }
 
 // --- panel de escucha ---
 
-function configDe(f: Familia): ConfigLlamada {
-  return { canal: f.canal, quienEscucha: f.quienEscucha, protegido: f.protegido, respaldo: f.respaldo, esperaSeg: f.esperaSeg };
-}
-
-const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 function Panel({ familia, alEditar }: { familia: Familia; alEditar: () => void }) {
-  const [vista, setVista] = useState<VistaEscucha | null>(null);
-  const [modo, setModo] = useState<Modo | null>(null);
-  const [activa, setActiva] = useState(false);
-  const [enviando, setEnviando] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const { vista, modo, activa, enviando, error, empezar, colgar, nueva } = useLlamada(familia);
   const [verdeOculto, setVerdeOculto] = useState(false);
-  const idRef = useRef<string | null>(null);
-  const colgadaRef = useRef<string | null>(null);
-  const fuenteRef = useRef<Fuente | null>(null);
-  const emisorRef = useRef<Emisor | null>(null);
-  const guionRef = useRef<{ cancelado: boolean } | null>(null);
   const archivoRef = useRef<HTMLInputElement>(null);
 
-  const id = vista?.id;
-  useEffect(() => {
-    if (!id) return;
-    let vivo = true;
-    const t = setInterval(async () => {
-      const r = await fetch(`/api/llamadas/${id}`, { cache: "no-store" }).catch(() => null);
-      if (!vivo || !r?.ok) return;
-      const v = (await r.json()) as VistaEscucha;
-      if (vivo && idRef.current === id) setVista(v);
-    }, 1000);
-    return () => {
-      vivo = false;
-      clearInterval(t);
-    };
-  }, [id]);
-
-  async function colgar(llamada = idRef.current) {
-    if (!llamada || colgadaRef.current === llamada) return;
-    colgadaRef.current = llamada;
-    fuenteRef.current?.detener();
-    fuenteRef.current = null;
-    if (guionRef.current) guionRef.current.cancelado = true;
-    setActiva(false);
-    await emisorRef.current?.cerrar();
-    emisorRef.current = null;
-    const r = await fetch(`/api/llamadas/${llamada}/fin`, { method: "POST" }).catch(() => null);
-    if (r?.ok && idRef.current === llamada) setVista((await r.json()) as VistaEscucha);
-  }
-
-  async function correrGuion(llamada: string) {
-    const control = { cancelado: false };
-    guionRef.current = control;
-    for (const t of guionEjemplo.turnos) {
-      await dormir(3_500);
-      if (control.cancelado) return;
-      const r = await fetch(`/api/llamadas/${llamada}/turno`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ hablante: t.hablante === "llamante" ? "llamante" : "receptor", texto: t.texto }),
-      }).catch(() => null);
-      if (r?.ok && idRef.current === llamada) setVista((await r.json()) as VistaEscucha);
-    }
-  }
-
-  async function empezar(m: Modo, archivo?: File) {
-    setError(null);
+  function iniciar(m: Modo, archivo?: File) {
     setVerdeOculto(false);
-    const r = await fetch("/api/llamadas", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(configDe(familia)),
-    }).catch(() => null);
-    if (!r?.ok) {
-      setError("No se pudo empezar. Revisa la conexión.");
-      return;
-    }
-    const { vista: v, puedeEscuchar } = (await r.json()) as { vista: VistaEscucha; puedeEscuchar: boolean };
-    if (m !== "guion" && !puedeEscuchar) {
-      setError("Este servidor no tiene un modelo para escuchar audio. Prueba con el guion de ejemplo.");
-      return;
-    }
-    idRef.current = v.id;
-    setVista(v);
-    setModo(m);
-    setActiva(true);
-    if (m === "guion") {
-      void correrGuion(v.id);
-      return;
-    }
-
-    const emisor = new Emisor(async (wav) => {
-      setEnviando((n) => n + 1);
-      try {
-        const res = await fetch(`/api/llamadas/${v.id}/audio`, { method: "POST", headers: { "content-type": "audio/wav" }, body: wav });
-        if (res.ok && idRef.current === v.id) setVista((await res.json()) as VistaEscucha);
-        else if (!res.ok) setError("Un trozo de audio no se pudo escuchar. Seguimos con el siguiente.");
-      } finally {
-        setEnviando((n) => n - 1);
-      }
-    });
-    emisorRef.current = emisor;
-    try {
-      const fuente = m === "mic" ? await desdeMicrofono((x) => emisor.empujar(x)) : await desdeArchivo(archivo!, (x) => emisor.empujar(x));
-      fuenteRef.current = fuente;
-      void fuente.terminada.then(() => colgar(v.id));
-    } catch {
-      setError(m === "mic" ? "No hay permiso para usar el micrófono." : "No se pudo leer ese audio.");
-      void colgar(v.id);
-    }
-  }
-
-  function nueva() {
-    idRef.current = null;
-    setVista(null);
-    setModo(null);
-    setError(null);
+    void empezar(m, archivo);
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-5 px-4 py-6">
-      <header className="flex items-baseline justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold tracking-widest text-zinc-400 uppercase">Cuelga</p>
-          <p className="text-zinc-300">
-            Protegiendo a <strong>{familia.protegido}</strong>
+    <main className="min-h-dvh bg-noche text-papel">
+      <Barra claro={false} derecha={enlaceDemo} />
+      <div className="mx-auto flex max-w-2xl flex-col gap-5 px-4 pt-2 pb-10">
+        <div className="flex items-center justify-between gap-4 rounded-full bg-noche-2 py-2 pr-2 pl-4">
+          <p className="truncate text-papel/80">
+            Protegiendo a <strong className="text-papel">{familia.protegido}</strong>
             {familia.respaldo ? ` · respaldo: ${familia.respaldo}` : ""}
           </p>
-        </div>
-        {!activa && (
-          <button onClick={alEditar} className="text-sm text-zinc-400 underline">
-            Cambiar
-          </button>
-        )}
-      </header>
-
-      {vista ? (
-        <EnLlamada vista={vista} familia={familia} activa={activa} modo={modo} enviando={enviando} />
-      ) : (
-        <section className="flex flex-col gap-3">
-          <button onClick={() => empezar("mic")} className="rounded-3xl bg-white px-6 py-8 text-2xl font-bold text-black">
-            Escuchar llamada
-            <span className="mt-1 block text-base font-normal text-zinc-600">Pon la llamada sospechosa en altavoz cerca de aquí</span>
-          </button>
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => archivoRef.current?.click()} className="rounded-2xl border border-zinc-700 px-4 py-4 font-semibold">
-              Usar un audio grabado
+          {!activa && (
+            <button onClick={alEditar} className="shrink-0 rounded-full px-3 py-1.5 text-sm text-papel/60 hover:bg-noche-3 hover:text-papel">
+              Cambiar
             </button>
-            <button onClick={() => empezar("guion")} className="rounded-2xl border border-zinc-700 px-4 py-4 font-semibold">
-              Guion de ejemplo
-              <span className="block text-xs font-normal text-zinc-400">sintético, sin audio</span>
-            </button>
-          </div>
-          <input
-            ref={archivoRef}
-            type="file"
-            accept="audio/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              e.target.value = "";
-              if (f) void empezar("archivo", f);
-            }}
-          />
-        </section>
-      )}
-
-      {error && <p className="rounded-xl border border-red-800 bg-red-950 px-4 py-3 text-red-200">{error}</p>}
-
-      {vista && (activa ? (
-        <button onClick={() => colgar()} className="rounded-2xl border border-zinc-600 px-6 py-4 text-lg font-semibold">
-          {modo === "archivo" ? "Detener audio" : "Ya colgué"}
-        </button>
-      ) : (
-        <button onClick={nueva} className="rounded-2xl border border-zinc-600 px-6 py-4 text-lg font-semibold">
-          Nueva llamada
-        </button>
-      ))}
-
-      {!activa && <Telefonos familia={familia} abierto={!vista} />}
-
-      {vista?.fase === "a_salvo" && !verdeOculto && (
-        <button onClick={() => setVerdeOculto(true)} className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-green-500 p-6 text-center text-black">
-          <span className="text-6xl leading-tight font-black sm:text-7xl">
-            {familia.protegido} ESTÁ A SALVO.
-            <br />
-            CUELGA.
-          </span>
-          {vista.segASalvo !== null && (
-            <span className="text-xl font-semibold">Confirmado {vista.segASalvo} s después de la primera frase del extorsionador.</span>
           )}
-          <span className="text-sm underline">Toca para ver el detalle</span>
-        </button>
-      )}
+        </div>
 
-      <footer className="mt-auto pt-6 text-sm text-zinc-500">Cuelga nunca te dirá que pagues ni que negocies. Si alguien está en peligro, llama al 911.</footer>
-    </main>
-  );
-}
-
-const ESTILO_FASE: Record<Fase, string> = {
-  escuchando: "border-zinc-700 bg-zinc-900",
-  atencion: "border-amber-500 bg-amber-950",
-  verificando: "border-orange-500 bg-orange-950",
-  segundo_contacto: "border-orange-500 bg-orange-950",
-  sin_respuesta: "border-red-500 bg-red-950",
-  a_salvo: "border-green-400 bg-green-950",
-  pidio_ayuda: "border-red-400 bg-red-800",
-};
-
-function EnLlamada({ vista, familia, activa, modo, enviando }: { vista: VistaEscucha; familia: Familia; activa: boolean; modo: Modo | null; enviando: number }) {
-  const texto =
-    vista.mensaje?.texto ??
-    (activa ? (modo === "mic" ? "Escuchando. Pon la llamada en altavoz cerca de este dispositivo." : "Escuchando la llamada…") : "Llamada terminada.");
-  const siguiente = familia.respaldo ? `preguntamos a ${familia.respaldo}` : "te diremos que cuelgues y llames al 089";
-
-  return (
-    <section className="flex flex-col gap-4">
-      <div className={`rounded-3xl border-2 p-6 ${ESTILO_FASE[vista.fase]}`} aria-live="assertive">
-        <p className="text-3xl leading-snug font-bold">{texto}</p>
-        {vista.preguntas.map((p) => (
-          <p key={p.nombre} className="mt-3 text-lg">
-            {p.estaBien === true
-              ? `✓ ${p.nombre} respondió que está bien`
-              : p.estaBien === false
-                ? `✗ ${p.nombre} respondió que NO está bien`
-                : `Preguntando en silencio a ${p.nombre}… ${p.esperandoSeg ?? 0} s`}
-          </p>
-        ))}
-        {vista.escalaEnSeg !== null && vista.fase === "verificando" && (
-          <p className="mt-1 text-zinc-300">
-            Si {familia.protegido} no contesta en {vista.escalaEnSeg} s, {siguiente}.
-          </p>
+        {vista ? (
+          <section className="flex flex-col gap-4">
+            <EstadoLlamada
+              vista={vista}
+              protegido={familia.protegido}
+              respaldo={familia.respaldo}
+              esperaSeg={familia.esperaSeg}
+              activa={activa}
+              textoInactivo={modo === "mic" ? "Escuchando. Pon la llamada en altavoz cerca de este dispositivo." : "Escuchando la llamada…"}
+            />
+            <PistaEtapas etapas={vista.etapas} />
+            <Transcripcion turnos={vista.turnos} />
+            <Metricas vista={vista} enviando={enviando} />
+          </section>
+        ) : (
+          <section className="flex flex-col gap-3">
+            <button onClick={() => iniciar("mic")} className="group flex flex-col items-center gap-4 rounded-equipo bg-papel px-6 py-10 text-center text-tinta">
+              <span className="relative grid size-20 place-items-center" aria-hidden="true">
+                <span className="absolute inset-0 rounded-full bg-tinta/10 motion-safe:group-hover:animate-latir" />
+                <span className="grid size-16 place-items-center rounded-full bg-tinta">
+                  <Marca tono="papel" className="size-10" />
+                </span>
+              </span>
+              <span className="font-display text-3xl font-extrabold tracking-[-0.02em] sm:text-4xl">Escuchar una llamada</span>
+              <span className="max-w-sm text-tinta-2">Cuando entre una llamada sospechosa, pon el altavoz y deja el teléfono junto a esta pantalla.</span>
+            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button onClick={() => archivoRef.current?.click()} className="rounded-tarjeta bg-noche-2 px-4 py-4 text-left hover:bg-noche-3">
+                <span className="block font-semibold">Usar un audio grabado</span>
+                <span className="block text-sm text-papel/50">Cualquier archivo de audio</span>
+              </button>
+              <button onClick={() => iniciar("guion")} className="rounded-tarjeta bg-noche-2 px-4 py-4 text-left hover:bg-noche-3">
+                <span className="block font-semibold">Ensayo con llamada de ejemplo</span>
+                <span className="block text-sm text-papel/50">Guion escrito, sin audio</span>
+              </button>
+            </div>
+            <input
+              ref={archivoRef}
+              type="file"
+              accept="audio/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) iniciar("archivo", f);
+              }}
+            />
+          </section>
         )}
-        {vista.escalaEnSeg !== null && vista.fase === "segundo_contacto" && (
-          <p className="mt-1 text-zinc-300">Si nadie contesta en {vista.escalaEnSeg} s: cuelga y llama al 089.</p>
-        )}
-        {vista.numero && (
-          <a href={`tel:${vista.numero}`} className="mt-5 block rounded-2xl bg-white px-6 py-4 text-center text-2xl font-black text-black">
-            Llamar al {vista.numero}
-          </a>
-        )}
+
+        {error && <p className="rounded-tarjeta border border-peligro bg-peligro/10 px-4 py-3">{error}</p>}
+
+        {vista &&
+          (activa ? (
+            <button onClick={() => colgar()} className="rounded-full border border-papel/30 px-6 py-4 text-lg font-semibold">
+              {modo === "archivo" ? "Detener audio" : "Ya colgué"}
+            </button>
+          ) : (
+            <button onClick={nueva} className="rounded-full bg-papel px-6 py-4 text-lg font-semibold text-tinta">
+              Nueva llamada
+            </button>
+          ))}
+
+        {!activa && <Telefonos familia={familia} abierto={!vista} />}
+
+        {vista?.fase === "a_salvo" && !verdeOculto && <PantallaASalvo nombre={familia.protegido} seg={vista.segASalvo} alCerrar={() => setVerdeOculto(true)} />}
+
+        <footer className="mt-auto pt-6 text-sm text-papel/40">Cuelga nunca te dirá que pagues ni que negocies. Si alguien está en peligro, llama al 911.</footer>
       </div>
-
-      <ol className="grid grid-cols-5 gap-1.5" aria-label="Etapas del guion de extorsión">
-        {ETAPAS.filter((e) => e !== "ninguna").map((e) => {
-          const vista_ = vista.etapas.includes(e);
-          return (
-            <li key={e} className={`rounded-lg px-2 py-2 text-center text-xs leading-tight ${vista_ ? "bg-orange-500 font-bold text-black" : "bg-zinc-900 text-zinc-500"}`}>
-              {ETAPA_INFO[e].nombre}
-            </li>
-          );
-        })}
-      </ol>
-
-      <Transcripcion turnos={vista.turnos} />
-
-      <p className="text-sm text-zinc-500">
-        {[
-          vista.segAlerta !== null && `Alerta a los ${vista.segAlerta} s`,
-          vista.segASalvo !== null && `a salvo a los ${vista.segASalvo} s`,
-          vista.segLlamada !== null && `llamada: ${minutos(vista.segLlamada)}`,
-          `gasto: $${vista.usd.toFixed(3)}`,
-          enviando > 0 && "escuchando un trozo…",
-        ]
-          .filter(Boolean)
-          .join(" · ")}
-      </p>
-      {vista.avisos.map((a, i) => (
-        <p key={i} className="text-sm text-amber-400">
-          {a}
-        </p>
-      ))}
-    </section>
-  );
-}
-
-function minutos(s: number) {
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
-
-const FUENTE: Record<TurnoVista["fuente"], string> = { lexico: "léxico", modelo: "modelo", ambos: "léxico + modelo", pendiente: "revisando…" };
-
-function Transcripcion({ turnos }: { turnos: TurnoVista[] }) {
-  const fin = useRef<HTMLLIElement>(null);
-  // Con llaves: en navegadores recientes scrollIntoView devuelve una promesa, y un efecto solo puede devolver su limpieza.
-  useEffect(() => {
-    fin.current?.scrollIntoView({ block: "nearest" });
-  }, [turnos.length]);
-  if (turnos.length === 0) return null;
-  return (
-    <details open className="rounded-2xl border border-zinc-800 p-4">
-      <summary className="cursor-pointer text-sm font-semibold text-zinc-400">Lo que se oye</summary>
-      <ol className="mt-3 flex max-h-72 flex-col gap-2 overflow-y-auto">
-        {turnos.map((t, i) => (
-          <li key={i} ref={i === turnos.length - 1 ? fin : undefined} className="text-sm">
-            <span className="font-semibold text-zinc-400">{t.hablante === "llamante" ? "Llamante" : t.hablante === "receptor" ? "En casa" : "Voz"}: </span>
-            <span>{t.texto}</span>
-            {t.etapa !== "ninguna" && <span className="ml-2 rounded bg-orange-500/20 px-1.5 py-0.5 text-xs text-orange-300">{ETAPA_INFO[t.etapa].nombre}</span>}
-            <span className="ml-2 text-xs text-zinc-600">{FUENTE[t.fuente]}</span>
-          </li>
-        ))}
-      </ol>
-    </details>
+    </main>
   );
 }
 
@@ -446,10 +277,12 @@ function Telefonos({ familia, abierto }: { familia: Familia; abierto: boolean })
   const contactos: { id: "protegido" | "respaldo"; nombre: string }[] = [{ id: "protegido", nombre: familia.protegido }];
   if (familia.respaldo) contactos.push({ id: "respaldo", nombre: familia.respaldo });
   return (
-    <details open={abierto} className="rounded-2xl border border-zinc-800 p-4">
-      <summary className="cursor-pointer font-semibold">Teléfonos de la familia</summary>
-      <p className="mt-2 text-sm text-zinc-400">Cada familiar abre su enlace una vez y deja la página abierta. Ahí le llega la pregunta, sin que suene una llamada.</p>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+    <details open={abierto} className="rounded-equipo bg-noche-2 p-5">
+      <summary className="cursor-pointer font-display text-xl font-bold">Conecta los teléfonos de la familia</summary>
+      <p className="mt-2 text-papel/60">
+        Cada familiar escanea su código una vez y deja la página abierta. Ahí le llega la pregunta, sin que suene una llamada.
+      </p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {contactos.map((c) => (
           <EnlaceTelefono key={c.id} nombre={c.nombre} enlace={enlaceFamiliar(familia, c.id)} />
         ))}
@@ -467,19 +300,19 @@ function EnlaceTelefono({ nombre, enlace }: { nombre: string; enlace: string }) 
       .catch(() => setSvg(""));
   }, [enlace]);
   return (
-    <div className="flex flex-col items-center gap-2 rounded-xl bg-zinc-900 p-4">
+    <div className="flex flex-col items-center gap-3 rounded-tarjeta bg-noche-3 p-4">
       <p className="font-semibold">Teléfono de {nombre}</p>
-      <div className="size-40 rounded-lg bg-white p-2 [&_svg]:size-full" dangerouslySetInnerHTML={{ __html: svg }} />
-      <div className="flex gap-3 text-sm">
+      <div className="size-40 rounded-xl bg-papel p-2 [&_svg]:size-full" dangerouslySetInnerHTML={{ __html: svg }} />
+      <div className="flex gap-2 text-sm">
         <button
           onClick={() => {
             void navigator.clipboard?.writeText(enlace).then(() => setCopiado(true));
           }}
-          className="underline"
+          className="rounded-full bg-noche-2 px-3 py-1.5 font-medium"
         >
           {copiado ? "Copiado" : "Copiar enlace"}
         </button>
-        <a href={enlace} target="_blank" rel="noreferrer" className="underline">
+        <a href={enlace} target="_blank" rel="noreferrer" className="rounded-full bg-noche-2 px-3 py-1.5 font-medium">
           Abrir aquí
         </a>
       </div>

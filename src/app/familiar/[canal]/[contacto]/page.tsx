@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Familiar } from "./familiar";
 
-export const metadata: Metadata = { title: "Cuelga · Familiar", robots: { index: false } };
+export const metadata: Metadata = { title: "Teléfono del familiar", robots: { index: false } };
 
 export default function Page({ params, searchParams }: PageProps<"/familiar/[canal]/[contacto]">) {
   return (
