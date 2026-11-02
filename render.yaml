@@ -1,0 +1,29 @@
+# Render Blueprint: one web service, nothing else.
+# The call store lives in the Node process (src/lib/store.ts), so this must stay a single instance:
+# no autoscaling, no second region. Render asks once for every `sync: false` value.
+# Spec: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: cuelga
+    runtime: node
+    region: oregon
+    # Paid instance: free ones sleep after 15 idle minutes, which wipes in-flight calls
+    # and makes judges wait for a cold start.
+    plan: 0.5c-512mb
+    numInstances: 1
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start -H 0.0.0.0
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: CUELGA_PROVEEDOR
+        value: baseten
+      - key: BASETEN_API_KEY
+        sync: false
+      # Spend caps enforced in code. They are per process, so a restart resets the running total;
+      # keep the public total low.
+      - key: CUELGA_MAX_USD_PER_SESSION
+        value: "0.50"
+      - key: CUELGA_MAX_USD_TOTAL
+        value: "10"
