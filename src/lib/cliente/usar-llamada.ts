@@ -7,7 +7,7 @@ import type { Familia } from "./familia";
 export type Modo = "mic" | "archivo" | "guion";
 
 function configDe(f: Familia): ConfigLlamada {
-  return { canal: f.canal, quienEscucha: f.quienEscucha, protegido: f.protegido, respaldo: f.respaldo, esperaSeg: f.esperaSeg };
+  return { canal: f.canal, quienEscucha: f.quienEscucha, protegido: f.protegido, respaldo: f.respaldo, esperaSeg: f.esperaSeg, suscripciones: f.suscripciones };
 }
 
 const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));

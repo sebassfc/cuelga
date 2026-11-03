@@ -26,7 +26,7 @@ Tu cuenta de dev.meta.ai está bloqueada por un chequeo de edad de Meta. El bot 
 |---|---|---|
 | Impact (30%) | Problema medido: Nuevo León tuvo 991 víctimas de extorsión en 2025 (4º nacional, SESNSP vía Grupo Animal). Recreación con la familia de Sebastián | Falta la recreación |
 | Uso de Meta (25%) | Spark Open **escucha** el audio y separa llamante/receptor con contexto entre trozos. El agente actúa **durante** la llamada | ✔︎ Oído probado en línea el 2-nov (voces sintéticas). Falta la voz real |
-| Profundidad (20%) | Léxico como piso determinista. Solo cuenta la cita textual del modelo (`citaEnTurno`). Máquina de estados con propiedades probadas (fast-check). Topes de gasto en código. 53 pruebas | ✔︎ |
+| Profundidad (20%) | Léxico como piso determinista. Solo cuenta la cita textual del modelo (`citaEnTurno`). Máquina de estados con propiedades probadas (fast-check). Topes de gasto en código. 59 pruebas | ✔︎ |
 | Demo (25%) | Pantalla "ESTÁ A SALVO, CUELGA" mientras el "comandante" sigue hablando. Falla visible: no contesta → 2º contacto → 089 | ✔︎ En línea desde el 2-nov: https://cuelga.onrender.com, demo guiada en `/demo` (sin configurar, subtítulos en inglés). Falta el video |
 
 ## Real vs simulado (para el video y el write-up)
@@ -66,6 +66,8 @@ Faltan dos cosas:
 - Guion sv-01 en `/escuchar` y en `/demo`: alerta a los 2 s; «a salvo» a los 18 s y a los 14 s (depende de cuándo contesta Ana); $0.010–$0.013 por llamada.
 - Nadie contesta (espera de 20 s): pregunta a Lucía a los ~21 s y muestra el 089 20 s después.
 - Oído: la misma llamada sintética de 23 s, mandada en trozos de 8 s por la API: transcribe y separa hablantes; la alerta sale con el primer trozo; 4.9–8.9 s por trozo; reconoció 2 de 5 etapas (gancho y autoridad; el «no cuelgue» quedó junto con «habla el comandante»); $0.026.
+
+**Notificaciones push (2-nov):** el «¿Estás bien?» sale también como Web Push, con el texto del catálogo cerrado y un botón «Sí» que contesta desde la notificación en Android. Las llaves VAPID salen de un secreto que genera Render, así que nadie las copia. Probado: el servidor firma y manda a FCM (una suscripción falsa recibió 410 en 285 ms, se borró y la pantalla de casa mostró el aviso); 6 pruebas nuevas, 59 en total. **Pendiente:** medir la entrega en un teléfono real.
 
 **Flujo completo en el navegador (1-nov, guion sv-01):**
 - Alerta a los 2–3 s.

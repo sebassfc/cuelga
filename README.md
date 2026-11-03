@@ -18,7 +18,7 @@ The app is in Mexican Spanish, because that is where this scam happens. The guid
 
 **The unhappy path:** press **Otra vez** and don't answer on Ana's phone. After 15 seconds Cuelga asks Lucía (the demo switches to her phone). If nobody answers, it tells you to hang up and shows **Llamar al 089**, Mexico's anonymous reporting line.
 
-**With your own family:** **/escuchar** sets up who answers at home, who to protect and a second contact, then shows a QR code for each relative's phone. **Escuchar una llamada** listens through the microphone (put a call on speaker next to the laptop), and **Usar un audio grabado** takes any audio file. These two modes call the Meta model; the scripted call only uses it to double-check each line.
+**With your own family:** **/escuchar** sets up who answers at home, who to protect and a second contact, then shows a QR code for each relative's phone. The relative opens it once and turns on notifications, so **"¿Estás bien?"** arrives even with the phone locked; on Android it can be answered right from the notification. **Escuchar una llamada** listens through the microphone (put a call on speaker next to the laptop), and **Usar un audio grabado** takes any audio file. These two modes call the Meta model; the scripted call only uses it to double-check each line.
 
 ## The problem
 
@@ -34,7 +34,7 @@ Virtual kidnapping is a common extortion script in Mexico. A caller plays a cryi
    - fake authority
    - demand
    - payment instructions
-4. Once the call crosses the alert threshold, an agent **silently** sends "¿Estás bien?" to the relative's phone, while the call keeps going.
+4. Once the call crosses the alert threshold, an agent **silently** sends "¿Estás bien?" to the relative's phone as a push notification, while the call keeps going.
 5. If the relative confirms, the screen shows **"ESTÁ A SALVO. CUELGA."** If nobody answers, it tries the second contact, then tells the user to hang up and call 089. **It never advises paying or negotiating.**
 
 ## Meta models
@@ -52,6 +52,7 @@ Virtual kidnapping is a common extortion script in Mexico. A caller plays a cryi
   - each contact is asked at most once
   - the alert level never drops
   - "safe" can only come from an affirmative reply by someone who was actually asked
+- **Notifications from the same catalog:** the push text is built on the server from the closed catalog, and the server only posts to browser push services (Google, Apple, Mozilla, Microsoft), never to an arbitrary URL.
 - **Spend caps in code:** every model call reserves its worst-case cost first and is refused past the cap. The public demo stops at $0.50 per call and $10 in total; after that only the lexicon keeps running.
 
 ## What is real and what is simulated
@@ -73,8 +74,8 @@ Virtual kidnapping is a common extortion script in Mexico. A caller plays a cryi
 
 - **The ear sometimes invents phrases.** With synthetic voices it produced lines that were not in the audio, and sometimes returned empty chunks. An invented phrase can only trigger one extra silent check, never advice.
 - **The model can raise the alert on a single line.** "¡Abuelita, ayúdame! ¡Me tienen!", with risk ≥0.85 and a verified quote, already triggers the check.
-- **The relative must keep the page open.** There are no push notifications yet.
-- **Everything lives in memory.** Restarting the server ends calls in progress. No voices or transcripts are written to disk, so the demo runs as a single Node instance.
+- **Notifications depend on the phone.** Android shows them from the browser. On iPhone the relative first adds Cuelga to the Home Screen (iOS 16.4 or later). Without notifications, the relative's page has to stay open. Delivery to a real phone has not been timed yet.
+- **Everything lives in memory.** Restarting the server ends calls in progress. Push subscriptions also live in memory, but the home device keeps a copy and sends it with every call, so they survive a restart. No voices or transcripts are written to disk, so the demo runs as a single Node instance.
 
 ## Run it
 

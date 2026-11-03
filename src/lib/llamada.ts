@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Clasificacion, TurnoLlamada } from "./classifier";
 import { estadoInicial, reducir, type ClaveMensaje, type ConfigPolitica, type Estado, type Evento, type Fase } from "./policy";
 import type { Etapa, Nivel } from "./stages";
+import { Suscripcion } from "./suscripcion";
 
 /**
  * Una llamada sospechosa en curso: lo que escucha el dispositivo de casa y lo que contestan los familiares.
@@ -22,6 +23,14 @@ export const ConfigLlamada = z.object({
   protegido: Nombre,
   respaldo: Nombre.nullable(),
   esperaSeg: z.number().int().min(15).max(120),
+  /**
+   * Copia de las suscripciones push que guarda la pantalla de casa, por si el servidor se reinició desde
+   * que el familiar activó sus notificaciones. Una suscripción inválida se descarta sin tumbar la llamada.
+   */
+  suscripciones: z
+    .object({ protegido: Suscripcion.optional().catch(undefined), respaldo: Suscripcion.optional().catch(undefined) })
+    .optional()
+    .catch(undefined),
 });
 export type ConfigLlamada = z.infer<typeof ConfigLlamada>;
 
@@ -206,6 +215,7 @@ export function textoPregunta(p: Pregunta["pregunta"], c: Pick<ConfigLlamada, "q
       si: "Sí, estoy bien",
       no: "No, necesito ayuda",
       noSe: null,
+      listo: `Listo. Ya le avisamos a ${c.quienEscucha} que estás bien.`,
     };
   }
   return {
@@ -214,6 +224,7 @@ export function textoPregunta(p: Pregunta["pregunta"], c: Pick<ConfigLlamada, "q
     si: `Sí, ${c.protegido} está bien`,
     no: `No, ${c.protegido} no está bien`,
     noSe: "No sé",
+    listo: `Listo. Ya le avisamos a ${c.quienEscucha} que ${c.protegido} está bien.`,
   };
 }
 

@@ -2,9 +2,11 @@
 
 import { use, useEffect, useRef, useState } from "react";
 import { Marca } from "@/components/marca";
-import type { VistaFamiliar } from "@/lib/llamada";
+import { activarNotificaciones, cerrarNotificaciones, soporte, suscribir } from "@/lib/cliente/notificaciones";
+import type { IdContacto, VistaFamiliar } from "@/lib/llamada";
 
 type Respuesta = { estaBien: boolean } | { noSe: true };
+type EstadoNotificaciones = "cargando" | "activas" | "apagadas" | "bloqueadas" | "instalar" | "no" | "error";
 
 export function Familiar({ params, searchParams }: { params: Promise<{ canal: string; contacto: string }>; searchParams: Promise<{ n?: string; de?: string }> }) {
   const { canal, contacto } = use(params);
@@ -23,7 +25,23 @@ export function Telefono({ canal, contacto, nombre, quien, enMarco = false }: { 
   const [respondida, setRespondida] = useState<{ llamadaId: string; r: Respuesta } | null>(null);
   const [conectado, setConectado] = useState<boolean | null>(null);
   const [avisosActivos, setAvisosActivos] = useState(false);
+  const [notif, setNotif] = useState<EstadoNotificaciones>("cargando");
   const audioRef = useRef<AudioContext | null>(null);
+  const id = contacto as IdContacto;
+
+  // Si este teléfono ya tenía notificaciones, se lo recuerda al servidor (por si se reinició).
+  useEffect(() => {
+    if (enMarco) return;
+    const s = soporte();
+    if (s !== "si") return setNotif(s);
+    if (Notification.permission === "denied") return setNotif("bloqueadas");
+    if (Notification.permission !== "granted") return setNotif("apagadas");
+    let vivo = true;
+    void suscribir(canal, id).then((ok) => vivo && setNotif(ok ? "activas" : "apagadas"));
+    return () => {
+      vivo = false;
+    };
+  }, [canal, id, enMarco]);
 
   useEffect(() => {
     let vivo = true;
@@ -68,7 +86,11 @@ export function Telefono({ canal, contacto, nombre, quien, enMarco = false }: { 
     return () => clearInterval(t);
   }, [idPendiente, enMarco]);
 
+  const puedeNotificar = notif === "apagadas" || notif === "error";
+
   async function activarAvisos() {
+    // El permiso de notificaciones se pide primero, mientras el toque sigue «fresco» para el navegador.
+    const permiso = puedeNotificar ? activarNotificaciones(canal, id) : null;
     // El navegador solo deja sonar audio después de un toque; la pantalla encendida evita que se duerma la página.
     audioRef.current ??= new AudioContext();
     await audioRef.current.resume();
@@ -78,11 +100,13 @@ export function Telefono({ canal, contacto, nombre, quien, enMarco = false }: { 
       // sin permiso o sin HTTPS: la página sigue funcionando
     }
     setAvisosActivos(true);
+    if (permiso) setNotif(await permiso);
   }
 
   async function responder(r: Respuesta) {
     if (!pendiente) return;
     setRespondida({ llamadaId: pendiente.llamadaId, r });
+    void cerrarNotificaciones(pendiente.llamadaId);
     if ("noSe" in r) return;
     await fetch(api, {
       method: "POST",
@@ -148,17 +172,42 @@ export function Telefono({ canal, contacto, nombre, quien, enMarco = false }: { 
               <span className="absolute inset-0 rounded-full bg-senal/20 motion-safe:animate-latir" />
               <span className="size-5 rounded-full bg-senal" />
             </span>
-            <h1 className={`font-display leading-tight font-extrabold tracking-[-0.02em] ${titulo}`}>Deja esta página abierta.</h1>
-            <p className={enMarco ? "text-base text-papel/70" : "text-lg text-papel/70"}>
-              Si alguien llama a {quien} diciendo que te tiene, aquí te preguntamos si estás bien. Contestas con un toque, sin interrumpir la llamada.
-            </p>
+            {notif === "activas" ? (
+              <>
+                <h1 className={`font-display leading-tight font-extrabold tracking-[-0.02em] ${titulo}`}>Listo. Ya puedes cerrar esta página.</h1>
+                <p className="text-lg text-papel/70">
+                  Si alguien llama a {quien} diciendo que te tiene, te llega una notificación: «¿Estás bien?». Contestas con un toque, sin interrumpir la
+                  llamada.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className={`font-display leading-tight font-extrabold tracking-[-0.02em] ${titulo}`}>
+                  {puedeNotificar ? "Activa las notificaciones." : "Deja esta página abierta."}
+                </h1>
+                <p className={enMarco ? "text-base text-papel/70" : "text-lg text-papel/70"}>
+                  Si alguien llama a {quien} diciendo que te tiene, {puedeNotificar ? "te llega una notificación" : "aquí te preguntamos"} si estás bien.
+                  Contestas con un toque, sin interrumpir la llamada.
+                </p>
+              </>
+            )}
           </>
         )}
       </div>
 
-      {!enMarco && !avisosActivos && (
+      {!enMarco && notif === "instalar" && (
+        <p className="rounded-tarjeta bg-noche-2 px-4 py-3 text-papel/80">
+          En iPhone, para recibir notificaciones: toca <strong className="text-papel">Compartir</strong> y luego{" "}
+          <strong className="text-papel">Agregar a inicio</strong>. Abre Cuelga desde tu pantalla de inicio y actívalas ahí.
+        </p>
+      )}
+      {!enMarco && notif === "bloqueadas" && (
+        <p className="rounded-tarjeta bg-noche-2 px-4 py-3 text-papel/80">Las notificaciones están bloqueadas en este navegador. Permítelas en sus ajustes.</p>
+      )}
+      {!enMarco && notif === "error" && <p className="text-papel/70">No se pudieron activar las notificaciones. Intenta otra vez.</p>}
+      {!enMarco && notif !== "cargando" && (puedeNotificar || (!avisosActivos && notif !== "activas")) && (
         <button onClick={activarAvisos} className="rounded-full bg-papel px-6 py-4 text-lg font-bold text-tinta">
-          Activar sonido y vibración
+          {puedeNotificar ? "Activar notificaciones" : "Activar sonido y vibración"}
         </button>
       )}
       <p className={`flex items-center gap-2 text-sm ${conectado === false ? "text-peligro" : "text-papel/50"}`}>

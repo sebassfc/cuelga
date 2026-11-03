@@ -22,6 +22,9 @@ services:
         value: baseten
       - key: BASETEN_API_KEY
         sync: false
+      # Random value Render generates once; the push (VAPID) keys are derived from it, so they survive restarts.
+      - key: CUELGA_PUSH_SECRETO
+        generateValue: true
       # Spend caps enforced in code. They are per process, so a restart resets the running total;
       # keep the public total low.
       - key: CUELGA_MAX_USD_PER_SESSION

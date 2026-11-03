@@ -8,6 +8,8 @@ import { EstadoLlamada, Metricas, PantallaASalvo, PistaEtapas, Transcripcion } f
 import { Marca } from "@/components/marca";
 import { enlaceFamiliar, guardarFamilia, leerFamilia, nuevoCanal, type Familia } from "@/lib/cliente/familia";
 import { useLlamada, type Modo } from "@/lib/cliente/usar-llamada";
+import type { IdContacto } from "@/lib/llamada";
+import type { Suscripcion } from "@/lib/suscripcion";
 
 export function Escucha() {
   // undefined = todavía no se lee localStorage (evita parpadeo y desajuste de hidratación)
@@ -20,20 +22,24 @@ export function Escucha() {
     setEditando(!f);
   }, []);
 
+  function cambiar(f: Familia) {
+    guardarFamilia(f);
+    setFamilia(f);
+  }
+
   if (familia === undefined) return <main className="min-h-dvh bg-noche" />;
   if (editando || !familia) {
     return (
       <ConfigFamilia
         inicial={familia}
         alGuardar={(f) => {
-          guardarFamilia(f);
-          setFamilia(f);
+          cambiar(f);
           setEditando(false);
         }}
       />
     );
   }
-  return <Panel familia={familia} alEditar={() => setEditando(true)} />;
+  return <Panel familia={familia} alEditar={() => setEditando(true)} alCambiar={cambiar} />;
 }
 
 const enlaceDemo = (
@@ -95,6 +101,7 @@ function ConfigFamilia({ inicial, alGuardar }: { inicial: Familia | null; alGuar
               respaldo: respaldo.trim() || null,
               esperaSeg,
               base: base.trim(),
+              suscripciones: inicial?.suscripciones,
             });
           }}
         >
@@ -174,7 +181,7 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
 
 // --- panel de escucha ---
 
-function Panel({ familia, alEditar }: { familia: Familia; alEditar: () => void }) {
+function Panel({ familia, alEditar, alCambiar }: { familia: Familia; alEditar: () => void; alCambiar: (f: Familia) => void }) {
   const { vista, modo, activa, enviando, error, empezar, colgar, nueva } = useLlamada(familia);
   const [verdeOculto, setVerdeOculto] = useState(false);
   const archivoRef = useRef<HTMLInputElement>(null);
@@ -263,7 +270,7 @@ function Panel({ familia, alEditar }: { familia: Familia; alEditar: () => void }
             </button>
           ))}
 
-        {!activa && <Telefonos familia={familia} abierto={!vista} />}
+        {!activa && <Telefonos familia={familia} abierto={!vista} alCambiar={alCambiar} />}
 
         {vista?.fase === "a_salvo" && !verdeOculto && <PantallaASalvo nombre={familia.protegido} seg={vista.segASalvo} alCerrar={() => setVerdeOculto(true)} />}
 
@@ -273,25 +280,52 @@ function Panel({ familia, alEditar }: { familia: Familia; alEditar: () => void }
   );
 }
 
-function Telefonos({ familia, abierto }: { familia: Familia; abierto: boolean }) {
-  const contactos: { id: "protegido" | "respaldo"; nombre: string }[] = [{ id: "protegido", nombre: familia.protegido }];
+function Telefonos({ familia, abierto, alCambiar }: { familia: Familia; abierto: boolean; alCambiar: (f: Familia) => void }) {
+  const contactos: { id: IdContacto; nombre: string }[] = [{ id: "protegido", nombre: familia.protegido }];
   if (familia.respaldo) contactos.push({ id: "respaldo", nombre: familia.respaldo });
+
+  // Copia aquí las suscripciones de los teléfonos: si el servidor se reinicia, cada llamada se las vuelve a dar.
+  useEffect(() => {
+    let vivo = true;
+    async function revisar() {
+      const r = await fetch(`/api/notificaciones/${encodeURIComponent(familia.canal)}`, { cache: "no-store" }).catch(() => null);
+      if (!vivo || !r?.ok) return;
+      const servidor = (await r.json()) as Record<IdContacto, Suscripcion | null>;
+      const nuevas = { ...familia.suscripciones };
+      let cambio = false;
+      for (const id of ["protegido", "respaldo"] as const) {
+        const s = servidor[id];
+        if (s && s.endpoint !== nuevas[id]?.endpoint) {
+          nuevas[id] = s;
+          cambio = true;
+        }
+      }
+      if (cambio && vivo) alCambiar({ ...familia, suscripciones: nuevas });
+    }
+    void revisar();
+    const t = setInterval(revisar, 3_000);
+    return () => {
+      vivo = false;
+      clearInterval(t);
+    };
+  }, [familia, alCambiar]);
+
   return (
     <details open={abierto} className="rounded-equipo bg-noche-2 p-5">
       <summary className="cursor-pointer font-display text-xl font-bold">Conecta los teléfonos de la familia</summary>
       <p className="mt-2 text-papel/60">
-        Cada familiar escanea su código una vez y deja la página abierta. Ahí le llega la pregunta, sin que suene una llamada.
+        Cada familiar escanea su código una vez y activa las notificaciones. Ahí le llega la pregunta, sin que suene una llamada.
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {contactos.map((c) => (
-          <EnlaceTelefono key={c.id} nombre={c.nombre} enlace={enlaceFamiliar(familia, c.id)} />
+          <EnlaceTelefono key={c.id} nombre={c.nombre} enlace={enlaceFamiliar(familia, c.id)} conectado={Boolean(familia.suscripciones?.[c.id])} />
         ))}
       </div>
     </details>
   );
 }
 
-function EnlaceTelefono({ nombre, enlace }: { nombre: string; enlace: string }) {
+function EnlaceTelefono({ nombre, enlace, conectado }: { nombre: string; enlace: string; conectado: boolean }) {
   const [svg, setSvg] = useState("");
   const [copiado, setCopiado] = useState(false);
   useEffect(() => {
@@ -302,6 +336,10 @@ function EnlaceTelefono({ nombre, enlace }: { nombre: string; enlace: string }) 
   return (
     <div className="flex flex-col items-center gap-3 rounded-tarjeta bg-noche-3 p-4">
       <p className="font-semibold">Teléfono de {nombre}</p>
+      <p className={`-mt-2 flex items-center gap-1.5 text-sm ${conectado ? "text-senal" : "text-papel/50"}`}>
+        <span className={`size-2 rounded-full ${conectado ? "bg-senal" : "bg-papel/30"}`} aria-hidden="true" />
+        {conectado ? "Notificaciones activadas" : "Sin notificaciones todavía"}
+      </p>
       <div className="size-40 rounded-xl bg-papel p-2 [&_svg]:size-full" dangerouslySetInnerHTML={{ __html: svg }} />
       <div className="flex gap-2 text-sm">
         <button

@@ -28,7 +28,7 @@ const PREGUNTAS = [
   },
   {
     p: "¿Mi familiar tiene que instalar algo?",
-    r: "No. Abre su enlace una vez y deja la página abierta; ahí le llega la pregunta. Todavía no hay notificaciones push, así que la página tiene que seguir abierta.",
+    r: "No descarga nada. Abre su enlace una vez y activa las notificaciones: «¿Estás bien?» le llega aunque tenga el teléfono bloqueado. En Android funciona desde el navegador; en iPhone primero agrega Cuelga a su pantalla de inicio (iOS 16.4 o más nuevo).",
   },
   {
     p: "¿Con qué llamadas se ha probado?",
@@ -157,7 +157,7 @@ export default function Home() {
             {[
               ["2 s", "hasta la alerta, en la demo en línea"],
               ["18 s", "hasta «a salvo», misma prueba"],
-              ["53", "pruebas automáticas pasan"],
+              ["59", "pruebas automáticas pasan"],
               ["5", "etapas del guion que reconoce"],
             ].map(([cifra, texto]) => (
               <div key={texto} className="rounded-[22px] bg-tinta p-6 text-papel">

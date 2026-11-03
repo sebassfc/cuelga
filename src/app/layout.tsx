@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   title: { default: "Cuelga · Te dicen que la tienen. Cuelga confirma que está bien.", template: "%s · Cuelga" },
   description: "Mientras el extorsionador habla, Cuelga escucha la llamada y le pregunta en silencio a tu familiar si está bien. Si contesta que sí, cuelgas.",
   openGraph: { siteName: "Cuelga", locale: "es_MX", type: "website" },
+  // En iPhone, Cuelga en la pantalla de inicio abre sin barra de Safari y puede recibir notificaciones.
+  appleWebApp: { capable: true, title: "Cuelga", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = { themeColor: "#0b0f0d" };
