@@ -58,7 +58,7 @@ Virtual kidnapping is a common extortion script in Mexico. A caller plays a cryi
 ## What is real and what is simulated
 
 - **Real:** the model's transcription and speaker labels, the stage classification, the agent's rules, the check on the relative's phone, and the spend caps.
-- **Simulated:** the calls. The scripts in `data/guiones/` are synthetic, written for evaluation. The demo video uses a labeled re-enactment with the builder's family, with their consent. No real victims' calls or voices are used anywhere.
+- **Simulated:** the calls. The scripts in `data/guiones/` are synthetic, written for evaluation. The demo video is a screen recording of the live /demo with a scripted call, narrated by the builder. No real victims' calls or voices are used anywhere.
 
 ## Measured so far
 
